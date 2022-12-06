@@ -57,8 +57,11 @@ contents = CSV.open(
   header_converters: :symbol
 )
 
+number_of_rows = CSV.read('event_attendees.csv').length
+
 template_letter = File.read('form_letter.erb')
 erb_template = ERB.new template_letter
+t_arr = []
 
 contents.each do |row|
   id = row[0]
@@ -68,8 +71,6 @@ contents.each do |row|
 
   phone_number = clean_phonenumber(row[:homephone])
 
-  t_arr = []
-
   form_letter = erb_template.result(binding)
 
   legislators = legislators_by_zipcodes(zipcode)
@@ -77,6 +78,12 @@ contents.each do |row|
   # save_thank_you_letter(id,form_letter)
 
   puts "#{name} #{zipcode} #{phone_number}"
-  puts "Peak registration hours: #{peak_registration_hours(row[:regdate], t_arr)}"
+
+  if id.to_i == number_of_rows - 1
+    puts "Peak registration hours: #{peak_registration_hours(row[:regdate], t_arr)}"
+  else
+    peak_registration_hours(row[:regdate], t_arr)
+  end
+
 end
 
