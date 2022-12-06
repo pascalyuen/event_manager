@@ -33,10 +33,10 @@ def legislators_by_zipcodes(zip)
   end
 end
 
-def peak_registration_hours(time, array)
-  array.push(Time.strptime(time, "%m/%d/%Y %R").hour)
+def peak_registration_hours(time, array, division)
+  array.push(Time.strptime(time, "%m/%d/%Y %R").send(division))
   hsh = array.group_by{ |h| h }
-  peak_hour = Hash[hsh.max_by(2) {|k, v| v.length }].keys.sort
+  Hash[hsh.max_by(2) {|k, v| v.length }].keys.sort
 end
 
 def save_thank_you_letter(id,form_letter)
@@ -62,6 +62,7 @@ number_of_rows = CSV.read('event_attendees.csv').length
 template_letter = File.read('form_letter.erb')
 erb_template = ERB.new template_letter
 t_arr = []
+d_arr = []
 
 contents.each do |row|
   id = row[0]
@@ -80,9 +81,11 @@ contents.each do |row|
   puts "#{name} #{zipcode} #{phone_number}"
 
   if id.to_i == number_of_rows - 1
-    puts "Peak registration hours: #{peak_registration_hours(row[:regdate], t_arr)}"
+    puts "Peak registration hours: #{peak_registration_hours(row[:regdate], t_arr, 'hour')}"
+    puts "Peak day of week: #{peak_registration_hours(row[:regdate], d_arr, 'wday')}"
   else
-    peak_registration_hours(row[:regdate], t_arr)
+    peak_registration_hours(row[:regdate], t_arr, 'hour')
+    peak_registration_hours(row[:regdate], d_arr, 'wday')
   end
 
 end
